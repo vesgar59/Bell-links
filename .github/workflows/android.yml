@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   build:
+    name: Build Android APK
     runs-on: ubuntu-24.04
 
     defaults:
@@ -18,7 +19,7 @@ jobs:
         working-directory: BellLinkTracker_APK_Build_Package
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Java 17
@@ -29,11 +30,20 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build APK
+      - name: Check project files
+        run: |
+          pwd
+          ls -la
+          test -f settings.gradle.kts -o -f settings.gradle
+          test -d app
+
+      - name: Build Debug APK
         run: |
           if [ -f gradlew ]; then
             chmod +x gradlew
@@ -48,3 +58,4 @@ jobs:
           name: BellLink-Android-APK
           path: BellLinkTracker_APK_Build_Package/app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+          retention-days: 30
